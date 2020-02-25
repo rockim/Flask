@@ -1,29 +1,30 @@
 # Flask_Nginx_Uwsgi
 
 ## Folder_Path
-L myproject
 
-          L myproject.py
+          L myproject
+
+                    L myproject.py
           
-          L uwsgi.ini
+                    L uwsgi.ini
           
-          L wsgi.py
+                    L wsgi.py
           
-          L templates
+                    L templates
           
-                    L index.hmtl
+                              L index.hmtl
                     
-                    L test.html
+                              L test.html
                     
-                    L check.html
+                              L check.html
                     
-          L static
+                    L static
           
-                  L css
+                              L css
                   
-                  L js
+                              L js
                   
-                  L img
+                              L img
                   
-                  L fonts
+                              L fonts
           
