@@ -50,6 +50,8 @@ def get_video(target_url):
                 else:
                     short_title = short_title + title[t]
             title = short_title + "..."
+        if len(title.encode()) < 66:
+            title = title + "사랑해 개리형"
         video_link = 'http://www.youtube.com' + li.find('a',{'href' : True})['href']
         img_link = li.find('img', {'src' : True})['src']
         play_time = li.find('span',{'class' : 'video-time'}).text
