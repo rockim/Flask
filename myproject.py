@@ -28,9 +28,43 @@ class User(db.Model):
         return check_password_hash(self.password,password)
 
 @app.route("/")
-def hello():
+def home():
     session['logged_in'] = False
     return render_template('index.html')
+@app.route("/garry")
+def garry():
+    garry_info_list = get_video("https://www.youtube.com/channel/UCRpdlPk671uOMiBtf5HtB3Q/videos?view=0&sort=p&shelf_id=2")
+    return render_template('video.html',garry_info_list = garry_info_list)
+def get_video(target_url):
+    garry = requests.get(target_url)
+    soup = BeautifulSoup(garry.text,'lxml')
+    lis = soup.find_all('li',{'class': 'channels-content-item yt-shelf-grid-item'})
+    garry_info_list = []
+    for li in lis:
+        title = li.find('a',{'title' : True})['title']
+        if len(title)>46:
+            short_title = ""
+            for t in range(len(title)):
+                if t >= 44:
+                    break
+                else:
+                    short_title = short_title + title[t]
+            title = short_title + "..."
+        video_link = 'http://www.youtube.com' + li.find('a',{'href' : True})['href']
+        img_link = li.find('img', {'src' : True})['src']
+        play_time = li.find('span',{'class' : 'video-time'}).text
+        hits = li.find_all('li')[0].text
+        updated_time = li.find_all('li')[1].text
+        garry_video_info = {
+                'title' : title,
+                'video_link' : video_link,
+                'img_link' : img_link,
+                'play_time' : play_time,
+                'hits' : hits,
+                'updated_time' : updated_time
+                }
+        garry_info_list.append(garry_video_info)
+    return garry_info_list
 @app.route("/logging", methods = ['GET','POST'])
 def logging():
     if request.method == 'GET':
