@@ -23,6 +23,8 @@
                                         
                               L logging.html
                               
+                              L video.html
+                              
                     L static
           
                               L css
