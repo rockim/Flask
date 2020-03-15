@@ -1,31 +1,13 @@
-from flask import Flask, redirect, url_for, request,render_template,redirect,session
+from flask import Flask,flash, redirect, url_for, request,render_template,redirect,session
 import requests
-from flask_sqlalchemy import SQLAlchemy
 from bs4 import BeautifulSoup
-from werkzeug.security import generate_password_hash, check_password_hash
-
+from models import db, User
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'afnlb113!sl'
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(80), unique = True)
-    password = db.Column(db.String(80))
-    def __init__(self, username, password):
-        self.username = username
-        self.set_password(password)
-    
-    def __repr__(self):
-        return f"<User( '{self.id}', '{self.username}')>"
-
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self,password):
-        return check_password_hash(self.password,password)
+db.init_app(app)
+db.app = app
 
 @app.route("/")
 def home():
@@ -72,17 +54,20 @@ def logging():
     if request.method == 'GET':
         return render_template('logging.html')
     else:
-        name = request.form['username']
+        name = request.form['userid']
         passw = request.form['password']
-        try:
-            data = User.query.filter_by(username = name).first()
-            if data.check_password(passw):
-                session['logged_in'] = True
-                return redirect(url_for('test'))
-            else:
-                return 'Dont login'
-        except:
-            return "Dont login"
+        if len(name)>0 and len(passw) > 0:
+            try:
+                data = User.query.filter_by(userid = name).first()
+                if data.check_password(passw):
+                    session['logged_in'] = True
+                    return redirect(url_for('test'))
+                else:
+                    return 'Dont login'
+            except:
+                return "except Dont login"
+        else:
+            return render_template('logging.html')
 @app.route('/test',methods = ["GET","POST"])
 def test():
     if session['logged_in']:
@@ -92,7 +77,24 @@ def test():
         return render_template('test.html')
     else:
         return redirect(url_for('logging'))
+@app.route('/register',methods = ["GET","POST"])
+def register():
+    if request.method == 'POST':
+        uname = request.form['username']
+        uid = request.form['userid']
+        pword = request.form['password']
+        el1 = request.form['email01']
+        el2 = request.form['email02']
+        if(len(uname)>0 and len(uid) > 0 and len(pword) > 0 and len(el1) > 0 and len(el2) > 0 ):
+            new_user = User(username=uname,userid = uid,password = pword,email = el1 + el2)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('logging'))
+        else:
+            len_error = '빈칸을 채워주세요'
+            return render_template('register.html',error = len_error)
 
+    return render_template('register.html')
 @app.route('/check',methods = ['POST','GET'])
 def check():
     value = request.form['test']
